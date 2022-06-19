@@ -1,4 +1,4 @@
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useTransition } from "@remix-run/react";
 import { createPost } from "~/models/post.server";
 import { ActionFunction, json, redirect } from "@remix-run/node";
 import invariant from "tiny-invariant";
@@ -13,6 +13,7 @@ type ActionData =
 }
 | undefined;
 export const action: ActionFunction = async ({ request }) => {
+  await new Promise((res) => setTimeout(res, 1000))
   const formData = await request.formData();
 
   const title = formData.get("title");
@@ -52,6 +53,9 @@ export const action: ActionFunction = async ({ request }) => {
 export default function NewPost() {
   const errors = useActionData();
 
+  const transition = useTransition();
+  const isCreating = Boolean(transition.submission);
+
   return (
     <Form method="post">
       <p>
@@ -64,7 +68,9 @@ export default function NewPost() {
             type="text"
             name="title"
             className={inputClassName}
+            disabled={isCreating}
           />
+          {isCreating ? "Creating..." : "Create Post"}
         </label>
       </p>
       <p>
